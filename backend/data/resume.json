@@ -1,0 +1,146 @@
+{
+  "email": "ntarindwajean11@gmail.com",
+  "username": "dieudonne",
+  "password": "Portfolio2026!",
+  "full_name": "NTARINDWA Jean Dieudonne",
+  "headline": "Aspiring Machine Learning Engineer · AI, Data Science & applied Python",
+  "location": "Kigali, Rwanda",
+  "phone": "+25078554391",
+  "public_email": "ntarindwajean11@gmail.com",
+  "website": "",
+  "github": "https://github.com/Dieudonne-developer",
+  "linkedin": "https://www.linkedin.com/in/ntarindwa-jean-75a137445",
+  "twitter": "https://x.com/NtarindwaD9",
+  "birthday": "2002-01-01",
+  "is_public": true,
+  "bio": "I am NTARINDWA Jean Dieudonne, an aspiring Machine Learning Engineer based in Kigali. I focus on Artificial Intelligence and Data Science, and I use programming to turn models into usable tools.\n\nI am pursuing a Bachelor's degree in Information Technology at Rwanda Polytechnic (RP) – Huye College, with expected completion in 2027. Alongside coursework I study machine learning in practice: classification and regression, data preprocessing, feature engineering, model training and evaluation, and the fundamentals of deep learning for image classification.\n\nI also have more than one year of IT infrastructure and helpdesk experience, which taught me to work carefully with real systems and users. Python is my main language for ML work. JavaScript, Node.js, FastAPI, and React help me deploy and integrate models in web and mobile applications.\n\nI am looking for junior and internship roles in machine learning, AI engineering, and data science, where I can keep learning while contributing to intelligent solutions for real problems.",
+  "education": [
+    {
+      "institution": "Rwanda Polytechnic (RP) – Huye College",
+      "degree": "Bachelor's degree (in progress)",
+      "field": "Information Technology",
+      "start_date": "2024-01",
+      "end_date": "2027-12",
+      "description": "Currently pursuing a Bachelor's degree in Information Technology, expected in 2027. Studies include programming, databases, and information systems. Parallel self-study in machine learning, data science, and application development."
+    },
+    {
+      "institution": "Nyamata TVET School",
+      "degree": "Advanced Level (A' Level)",
+      "field": "Electronics",
+      "start_date": "",
+      "end_date": "2024-01",
+      "description": "Advanced Level studies in Electronics."
+    },
+    {
+      "institution": "G.S Ruhanga",
+      "degree": "Ordinary Level (O' Level)",
+      "field": "",
+      "start_date": "",
+      "end_date": "",
+      "description": "Ordinary Level studies."
+    }
+  ],
+  "experience": [
+    {
+      "title": "IT Intern",
+      "company": "ROBA Industries",
+      "location": "Rwanda",
+      "start_date": "2025-01",
+      "end_date": null,
+      "is_current": true,
+      "description": "Support IT infrastructure and respond to end-user technical requests within a leading industrial group. Configure network settings and manage Active Directory profiles to support consistent user access across manufacturing and logistics. Maintain Office 365 environments, troubleshoot hardware and software issues, and resolve tickets in collaboration with the senior IT team."
+    },
+    {
+      "title": "IT Intern",
+      "company": "Nyarugenge District",
+      "location": "Kigali, Rwanda",
+      "start_date": "2024-09",
+      "end_date": "2024-10",
+      "is_current": false,
+      "description": "Troubleshot hardware and software issues for diverse end users and provided practical technical support. Maintained network configurations and performed routine system maintenance, using PowerShell to automate basic administrative tasks. Resolved user-access issues, managed IT equipment through ticket procedures, and applied cybersecurity fundamentals while supporting district data and helpdesk operations."
+    },
+    {
+      "title": "Machine Learning & Software Projects",
+      "company": "Independent and academic practice",
+      "location": "Kigali / Remote",
+      "start_date": "2024-01",
+      "end_date": null,
+      "is_current": true,
+      "description": "Build applied ML and software projects: image classification with PyTorch and EfficientNet-B0, linear regression for student performance prediction, FastAPI services, React interfaces, and Android work with JavaScript. Use Python for modeling and JavaScript/Node.js to integrate models into applications people can use."
+    }
+  ],
+  "skills": [
+    {"name": "Machine learning algorithms", "category": "Machine Learning & AI", "level": 80},
+    {"name": "Classification and regression", "category": "Machine Learning & AI", "level": 82},
+    {"name": "Data preprocessing", "category": "Machine Learning & AI", "level": 80},
+    {"name": "Feature engineering", "category": "Machine Learning & AI", "level": 76},
+    {"name": "Model training and evaluation", "category": "Machine Learning & AI", "level": 80},
+    {"name": "Deep learning fundamentals", "category": "Machine Learning & AI", "level": 74},
+    {"name": "Image classification", "category": "Machine Learning & AI", "level": 78},
+    {"name": "PyTorch", "category": "Machine Learning & AI", "level": 76},
+    {"name": "Python", "category": "Programming languages", "level": 88},
+    {"name": "JavaScript", "category": "Programming languages", "level": 84},
+    {"name": "SQL", "category": "Programming languages", "level": 78},
+    {"name": "FastAPI", "category": "Backend & applications", "level": 82},
+    {"name": "REST API development", "category": "Backend & applications", "level": 84},
+    {"name": "Node.js", "category": "Backend & applications", "level": 80},
+    {"name": "React", "category": "Backend & applications", "level": 80},
+    {"name": "Android application development", "category": "Backend & applications", "level": 74},
+    {"name": "PostgreSQL", "category": "Data & databases", "level": 78},
+    {"name": "SQLite", "category": "Data & databases", "level": 72},
+    {"name": "Git", "category": "Tools", "level": 82}
+  ],
+  "languages": [
+    {"name": "Kinyarwanda", "proficiency": "Fluent"},
+    {"name": "English", "proficiency": "Fluent"},
+    {"name": "German", "proficiency": "Good working proficiency"},
+    {"name": "French", "proficiency": "Basic"}
+  ],
+  "projects": [
+    {
+      "title": "Banana Leaf Disease Detection System",
+      "summary": "Image classification of banana leaf diseases with EfficientNet-B0, served through FastAPI and a React interface.",
+      "description": "Problem: farmers and agronomists need a practical way to distinguish common banana leaf conditions from photos. I developed an image classification workflow using EfficientNet-B0 in PyTorch for four classes: Cordana, Healthy, Pestalotiopsis, and Sigatoka. Work covered data preparation, model training and evaluation, then integration of the model behind a FastAPI backend and a React frontend so predictions can be used in an application. This project shows how I connect computer vision with deployable software. A public repository is not listed yet.",
+      "tags": ["PyTorch", "EfficientNet-B0", "Image classification", "FastAPI", "React", "Python"],
+      "repo_url": "",
+      "live_url": "",
+      "featured": true
+    },
+    {
+      "title": "Student Performance Prediction",
+      "summary": "Linear regression that relates study hours to examination scores, with correlation analysis and an interactive predictor.",
+      "description": "Problem: estimate how study time relates to exam performance using a simple, explainable model. I implemented linear regression, inspected the relationship between study hours and scores, and wrapped the model in an interactive prediction application so users can try different inputs. The public repository is work_linear_reguration on GitHub (JavaScript).",
+      "tags": ["Linear regression", "Correlation", "JavaScript", "Python"],
+      "repo_url": "https://github.com/Dieudonne-developer/work_linear_reguration",
+      "live_url": "",
+      "featured": true
+    },
+    {
+      "title": "Machine Learning practice notebooks",
+      "summary": "Hands-on notebooks for core machine learning concepts, data work, and model evaluation.",
+      "description": "A public GitHub repository used to practice machine learning: algorithms, preprocessing, and evaluation in Jupyter notebooks. It documents how I study ML alongside coursework rather than a single production system.",
+      "tags": ["Machine Learning", "Python", "Jupyter"],
+      "repo_url": "https://github.com/Dieudonne-developer/MachineLearning",
+      "live_url": "",
+      "featured": true
+    },
+    {
+      "title": "Professional Portfolio Platform",
+      "summary": "This FastAPI and React portfolio: public profile, projects, analytics, and a generated CV.",
+      "description": "Full-stack application used to publish my ML-focused profile. Built with React, FastAPI, and PostgreSQL (Neon in production-style hosting). Includes JWT authentication, a public page, PDF CV generation, project showcases, and visit analytics. Demonstrates that I can ship the software around a model, not only the notebook.",
+      "tags": ["Python", "FastAPI", "React", "PostgreSQL"],
+      "repo_url": "https://github.com/Dieudonne-developer",
+      "live_url": "",
+      "featured": false
+    },
+    {
+      "title": "Android application (Android Studio)",
+      "summary": "Native Android application work in Java using Android Studio.",
+      "description": "Mobile application practice in Android Studio with Java: user interface, application structure, and device-oriented software development. Complements web and API work when an intelligent feature needs a mobile client.",
+      "tags": ["Android", "Java"],
+      "repo_url": "https://github.com/Dieudonne-developer/Android_app_by",
+      "live_url": "",
+      "featured": false
+    }
+  ]
+}

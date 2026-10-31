@@ -1,0 +1,17 @@
+{
+  "name": "profile-platform",
+  "private": true,
+  "workspaces": [
+    "profile-web-app"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspace=profile-web-app",
+    "build": "npm run build --workspace=profile-web-app",
+    "preview": "npm run preview --workspace=profile-web-app",
+    "lint": "npm run lint --workspace=profile-web-app"
+  },
+  "dependencies": {
+    "@neon/config": "^1.9.6",
+    "@neon/env": "^1.6.6"
+  }
+}
