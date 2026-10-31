@@ -99,6 +99,63 @@ Tests run against an isolated SQLite file (`backend/tests/testdb.sqlite`) so the
 | `ML_BACKEND_URL` | Public Colab tunnel URL from the notebook (leaf inference) |
 | `VITE_API_BASE` | Frontend-only. Remote API origin when the UI is not proxied to FastAPI |
 
+## Vercel
+
+Use **two** Vercel projects from the same GitHub repo (`Dieudonne-developer/Profile`).
+
+### 1. API (`backend`)
+
+On New Project:
+
+| Field | Value |
+|---|---|
+| Project Name | `profile` (or `profile-api`) |
+| Root Directory | `backend` |
+| Framework Preset | FastAPI |
+| Build Command | leave empty |
+| Output Directory | N/A |
+| Install Command | `pip install -r requirements.txt` |
+
+Environment variables (Production and Preview). Do not wrap values in quotes:
+
+```
+DATABASE_URL=postgresql://USER:PASSWORD@HOST-pooler.REGION.aws.neon.tech/neondb?sslmode=require
+SECRET_KEY=a-long-random-string
+ACCESS_TOKEN_EXPIRE_MINUTES=10080
+PUBLIC_API_URL=https://profile.vercel.app
+PUBLIC_APP_URL=https://your-frontend.vercel.app
+CORS_ORIGINS=https://your-frontend.vercel.app,http://localhost:5173,http://127.0.0.1:5173
+CORS_ORIGIN_REGEX=https://.*\.vercel\.app
+OPENAI_API_KEY=
+OPENAI_MODEL=gpt-4o-mini
+ML_BACKEND_URL=
+```
+
+After the first deploy, set `PUBLIC_API_URL` to the real API hostname Vercel printed. Drop `channel_binding=require` on Vercel; keep `sslmode=require`.
+
+Check `https://<api>.vercel.app/api/health` and `https://<api>.vercel.app/api/u/dieudonne`.
+
+### 2. Website (`profile-web-app`)
+
+Create a **second** Vercel project:
+
+| Field | Value |
+|---|---|
+| Root Directory | `profile-web-app` |
+| Framework Preset | Vite |
+| Build Command | `npm run build` |
+| Output Directory | `dist` |
+
+Environment:
+
+```
+VITE_API_BASE=https://<api>.vercel.app
+```
+
+Then add that frontend origin to the API project's `CORS_ORIGINS` and `PUBLIC_APP_URL`.
+
+Photo uploads on Vercel are stored in `/tmp` and do not persist. Neon still stores the rest of the profile.
+
 ## Deployment notes
 
 1. Run PostgreSQL and apply `alembic upgrade head`.

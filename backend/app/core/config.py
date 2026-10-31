@@ -1,9 +1,16 @@
 from functools import lru_cache
 from pathlib import Path
+import os
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 ROOT = Path(__file__).resolve().parents[2]
+
+
+def _default_upload_dir() -> Path:
+    if os.getenv("VERCEL"):
+        return Path("/tmp/portfolio-uploads")
+    return ROOT / "app" / "static" / "uploads"
 
 
 class Settings(BaseSettings):
@@ -28,7 +35,7 @@ class Settings(BaseSettings):
         "http://localhost:5174,http://127.0.0.1:5174"
     )
     cors_origin_regex: str = ""
-    upload_dir: Path = ROOT / "app" / "static" / "uploads"
+    upload_dir: Path = _default_upload_dir()
     ml_backend_url: str = ""
 
     @property
