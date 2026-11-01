@@ -9,6 +9,7 @@ from reportlab.lib.units import mm
 from reportlab.platypus import (
     Image,
     KeepTogether,
+    PageBreak,
     Paragraph,
     SimpleDocTemplate,
     Spacer,
@@ -42,16 +43,6 @@ def _fitted_image(path: str, width: float, height: float) -> Image:
     return Image(buffer, width=width, height=height)
 
 
-def _shorten(text: str, limit: int = 220) -> str:
-    value = " ".join((text or "").split())
-    if len(value) <= limit:
-        return value
-    clipped = value[: limit - 1]
-    if " " in clipped:
-        clipped = clipped.rsplit(" ", 1)[0]
-    return clipped + "…"
-
-
 def _portrait_path(bundle: dict) -> str:
     candidates = []
     given = bundle.get("photo_path") or ""
@@ -77,41 +68,30 @@ def build_cv_pdf(bundle: dict) -> bytes:
     doc = SimpleDocTemplate(
         buffer,
         pagesize=A4,
-        leftMargin=16 * mm,
-        rightMargin=16 * mm,
-        topMargin=12 * mm,
-        bottomMargin=14 * mm,
+        leftMargin=18 * mm,
+        rightMargin=18 * mm,
+        topMargin=16 * mm,
+        bottomMargin=16 * mm,
     )
     styles = getSampleStyleSheet()
     title = ParagraphStyle(
-        "Name",
-        parent=styles["Heading1"],
-        textColor=NAVY,
-        fontSize=16,
-        leading=19,
-        spaceAfter=1,
-        spaceBefore=0,
+        "Name", parent=styles["Heading1"], textColor=NAVY, fontSize=22, spaceAfter=2
     )
     headline = ParagraphStyle(
-        "Headline",
-        parent=styles["Normal"],
-        textColor=TEAL,
-        fontSize=9.5,
-        leading=12,
-        spaceAfter=3,
+        "Headline", parent=styles["Normal"], textColor=TEAL, fontSize=11, spaceAfter=8
     )
     h2 = ParagraphStyle(
         "H2",
         parent=styles["Heading2"],
         textColor=NAVY,
-        fontSize=11,
-        spaceBefore=6,
-        spaceAfter=2,
+        fontSize=12,
+        spaceBefore=10,
+        spaceAfter=4,
         borderPadding=0,
     )
-    body = ParagraphStyle("Body", parent=styles["Normal"], textColor=MUTED, fontSize=8.5, leading=11)
+    body = ParagraphStyle("Body", parent=styles["Normal"], textColor=MUTED, fontSize=9, leading=13)
     item_title = ParagraphStyle(
-        "ItemTitle", parent=styles["Normal"], textColor=NAVY, fontSize=9, leading=12, spaceAfter=0
+        "ItemTitle", parent=styles["Normal"], textColor=NAVY, fontSize=10, leading=13
     )
 
     profile = bundle["profile"]
@@ -124,22 +104,19 @@ def build_cv_pdf(bundle: dict) -> bytes:
                     profile.get("public_email"),
                     profile.get("phone"),
                     f"Birthday: {profile.get('birthday')}" if profile.get("birthday") else "",
+                    profile.get("github"),
+                    profile.get("linkedin"),
+                    profile.get("twitter"),
+                    profile.get("website"),
                 ],
             )
         ),
-        body,
-    )
-    github = Paragraph(profile.get("github") or "", body)
-    other_links = Paragraph(
-        " · ".join(filter(None, [profile.get("linkedin"), profile.get("twitter"), profile.get("website")])),
         body,
     )
     identity = [
         Paragraph(profile.get("full_name") or bundle["user"]["username"], title),
         Paragraph(profile.get("headline") or "", headline),
         contact,
-        github,
-        other_links,
     ]
     photo_file = _portrait_path(bundle)
     if photo_file:
@@ -172,7 +149,7 @@ def build_cv_pdf(bundle: dict) -> bytes:
         *heading,
         Spacer(1, 6),
         Paragraph("Professional summary", h2),
-        Paragraph(_shorten((profile.get("bio") or "").replace("\n", " "), 520), body),
+        Paragraph((profile.get("bio") or "").replace("\n", "<br/>"), body),
     ]
 
     if bundle["skills"]:
@@ -189,8 +166,10 @@ def build_cv_pdf(bundle: dict) -> bytes:
     if bundle["projects"]:
         story.append(Paragraph("Selected projects", h2))
         for item in bundle["projects"]:
+            if "professional portfolio platform" in (item.get("title") or "").lower():
+                story.append(PageBreak())
             story.append(Paragraph(f"<b>{item['title']}</b> — {item.get('summary') or ''}", item_title))
-            story.append(Paragraph(_shorten(item.get("description") or "", 210), body))
+            story.append(Paragraph(item.get("description") or "", body))
             if item.get("repo_url"):
                 story.append(Paragraph(item["repo_url"], body))
 
@@ -206,7 +185,7 @@ def build_cv_pdf(bundle: dict) -> bytes:
                     item_title,
                 )
             )
-            story.append(Paragraph(_shorten(item.get("description") or "", 180), body))
+            story.append(Paragraph(item.get("description") or "", body))
 
     if bundle["education"]:
         story.append(Paragraph("Education", h2))
@@ -218,7 +197,7 @@ def build_cv_pdf(bundle: dict) -> bytes:
                     item_title,
                 )
             )
-            story.append(Paragraph(_shorten(item.get("description") or "", 160), body))
+            story.append(Paragraph(item.get("description") or "", body))
 
     if bundle["languages"]:
         story.append(Paragraph("Languages", h2))
