@@ -9,7 +9,6 @@ from reportlab.lib.units import mm
 from reportlab.platypus import (
     Image,
     KeepTogether,
-    PageBreak,
     Paragraph,
     SimpleDocTemplate,
     Spacer,
@@ -21,6 +20,36 @@ NAVY = HexColor("#0f172a")
 TEAL = HexColor("#0f766e")
 MUTED = HexColor("#475569")
 ROOT = Path(__file__).resolve().parents[3]
+
+
+def _fitted_image(path: str, width: float, height: float) -> Image:
+    with PILImage.open(path) as raw:
+        photo = raw.convert("RGB")
+        target = height / max(width, 1)
+        w, h = photo.size
+        current = h / max(w, 1)
+        if current > target:
+            new_h = max(int(w * target), 1)
+            top = max((h - new_h) // 2, 0)
+            photo = photo.crop((0, top, w, top + new_h))
+        else:
+            new_w = max(int(h / target), 1)
+            left = max((w - new_w) // 2, 0)
+            photo = photo.crop((left, 0, left + new_w, h))
+        buffer = BytesIO()
+        photo.save(buffer, format="JPEG", quality=90)
+        buffer.seek(0)
+    return Image(buffer, width=width, height=height)
+
+
+def _shorten(text: str, limit: int = 220) -> str:
+    value = " ".join((text or "").split())
+    if len(value) <= limit:
+        return value
+    clipped = value[: limit - 1]
+    if " " in clipped:
+        clipped = clipped.rsplit(" ", 1)[0]
+    return clipped + "…"
 
 
 def _portrait_path(bundle: dict) -> str:
@@ -48,30 +77,41 @@ def build_cv_pdf(bundle: dict) -> bytes:
     doc = SimpleDocTemplate(
         buffer,
         pagesize=A4,
-        leftMargin=18 * mm,
-        rightMargin=18 * mm,
-        topMargin=16 * mm,
-        bottomMargin=16 * mm,
+        leftMargin=16 * mm,
+        rightMargin=16 * mm,
+        topMargin=12 * mm,
+        bottomMargin=14 * mm,
     )
     styles = getSampleStyleSheet()
     title = ParagraphStyle(
-        "Name", parent=styles["Heading1"], textColor=NAVY, fontSize=22, spaceAfter=2
+        "Name",
+        parent=styles["Heading1"],
+        textColor=NAVY,
+        fontSize=16,
+        leading=19,
+        spaceAfter=1,
+        spaceBefore=0,
     )
     headline = ParagraphStyle(
-        "Headline", parent=styles["Normal"], textColor=TEAL, fontSize=11, spaceAfter=8
+        "Headline",
+        parent=styles["Normal"],
+        textColor=TEAL,
+        fontSize=9.5,
+        leading=12,
+        spaceAfter=3,
     )
     h2 = ParagraphStyle(
         "H2",
         parent=styles["Heading2"],
         textColor=NAVY,
-        fontSize=12,
-        spaceBefore=10,
-        spaceAfter=4,
+        fontSize=11,
+        spaceBefore=6,
+        spaceAfter=2,
         borderPadding=0,
     )
-    body = ParagraphStyle("Body", parent=styles["Normal"], textColor=MUTED, fontSize=9, leading=13)
+    body = ParagraphStyle("Body", parent=styles["Normal"], textColor=MUTED, fontSize=8.5, leading=11)
     item_title = ParagraphStyle(
-        "ItemTitle", parent=styles["Normal"], textColor=NAVY, fontSize=10, leading=13
+        "ItemTitle", parent=styles["Normal"], textColor=NAVY, fontSize=9, leading=12, spaceAfter=0
     )
 
     profile = bundle["profile"]
@@ -89,47 +129,36 @@ def build_cv_pdf(bundle: dict) -> bytes:
         ),
         body,
     )
-    links = Paragraph(
-        " · ".join(
-            filter(
-                None,
-                [
-                    profile.get("website"),
-                    profile.get("github"),
-                    profile.get("linkedin"),
-                    profile.get("twitter"),
-                ],
-            )
-        ),
+    github = Paragraph(profile.get("github") or "", body)
+    other_links = Paragraph(
+        " · ".join(filter(None, [profile.get("linkedin"), profile.get("twitter"), profile.get("website")])),
         body,
     )
     identity = [
         Paragraph(profile.get("full_name") or bundle["user"]["username"], title),
         Paragraph(profile.get("headline") or "", headline),
         contact,
-        links,
+        github,
+        other_links,
     ]
     photo_file = _portrait_path(bundle)
     if photo_file:
         try:
-            with PILImage.open(photo_file) as raw:
-                ratio = raw.height / max(raw.width, 1)
-            width = 34 * mm
-            height = min(max(width * ratio, 34 * mm), 46 * mm)
-            portrait = Image(photo_file, width=width, height=height)
+            photo_width = 28 * mm
+            text_width = doc.width - photo_width - 5 * mm
+            text_height = sum(item.wrap(text_width, 80 * mm)[1] for item in identity)
+            portrait = _fitted_image(photo_file, photo_width, text_height)
             intro = Table(
-                [[identity, portrait]],
-                colWidths=[doc.width - width - 6 * mm, width + 4 * mm],
+                [[portrait, identity]],
+                colWidths=[photo_width + 2 * mm, text_width],
             )
             intro.setStyle(
                 TableStyle(
                     [
                         ("VALIGN", (0, 0), (-1, -1), "TOP"),
-                        ("ALIGN", (1, 0), (1, 0), "RIGHT"),
                         ("LEFTPADDING", (0, 0), (-1, -1), 0),
-                        ("RIGHTPADDING", (0, 0), (0, 0), 8),
-                        ("LEFTPADDING", (1, 0), (1, 0), 4),
-                        ("RIGHTPADDING", (1, 0), (1, 0), 0),
+                        ("RIGHTPADDING", (0, 0), (0, 0), 6),
+                        ("LEFTPADDING", (1, 0), (1, 0), 2),
                     ]
                 )
             )
@@ -143,7 +172,7 @@ def build_cv_pdf(bundle: dict) -> bytes:
         *heading,
         Spacer(1, 6),
         Paragraph("Professional summary", h2),
-        Paragraph((profile.get("bio") or "").replace("\n", "<br/>"), body),
+        Paragraph(_shorten((profile.get("bio") or "").replace("\n", " "), 520), body),
     ]
 
     if bundle["skills"]:
@@ -160,10 +189,8 @@ def build_cv_pdf(bundle: dict) -> bytes:
     if bundle["projects"]:
         story.append(Paragraph("Selected projects", h2))
         for item in bundle["projects"]:
-            if "professional portfolio platform" in (item.get("title") or "").lower():
-                story.append(PageBreak())
             story.append(Paragraph(f"<b>{item['title']}</b> — {item.get('summary') or ''}", item_title))
-            story.append(Paragraph(item.get("description") or "", body))
+            story.append(Paragraph(_shorten(item.get("description") or "", 210), body))
             if item.get("repo_url"):
                 story.append(Paragraph(item["repo_url"], body))
 
@@ -179,7 +206,7 @@ def build_cv_pdf(bundle: dict) -> bytes:
                     item_title,
                 )
             )
-            story.append(Paragraph(item.get("description") or "", body))
+            story.append(Paragraph(_shorten(item.get("description") or "", 180), body))
 
     if bundle["education"]:
         story.append(Paragraph("Education", h2))
@@ -191,7 +218,7 @@ def build_cv_pdf(bundle: dict) -> bytes:
                     item_title,
                 )
             )
-            story.append(Paragraph(item.get("description") or "", body))
+            story.append(Paragraph(_shorten(item.get("description") or "", 160), body))
 
     if bundle["languages"]:
         story.append(Paragraph("Languages", h2))
