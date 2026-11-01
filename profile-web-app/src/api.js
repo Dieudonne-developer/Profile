@@ -101,6 +101,30 @@ export async function downloadCv(username) {
   URL.revokeObjectURL(url)
 }
 
+const NOTIFY_EMAIL = (import.meta.env.VITE_NOTIFY_EMAIL || 'ntarindwajean11@gmail.com').trim()
+
+export async function notifyOwnerEmail({ name, email, subject, message }) {
+  const response = await fetch(`https://formsubmit.co/ajax/${encodeURIComponent(NOTIFY_EMAIL)}`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+    },
+    body: JSON.stringify({
+      name,
+      email,
+      _replyto: email,
+      _subject: `[Portfolio] ${subject || 'Portfolio contact'}`,
+      message,
+      _template: 'box',
+      _captcha: 'false',
+    }),
+  })
+  if (!response.ok) {
+    throw new Error(`Gmail notify failed (${response.status})`)
+  }
+}
+
 export function trackEvent(username, eventType, extra = {}) {
   if (!username) return
   api('/api/analytics/track', {

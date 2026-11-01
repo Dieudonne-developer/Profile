@@ -9,7 +9,7 @@ import {
   MapPin,
   ScanLine,
 } from 'lucide-react'
-import { api, downloadCv, trackEvent } from '../api'
+import { api, downloadCv, notifyOwnerEmail, trackEvent } from '../api'
 import { useAuth } from '../context/AuthContext'
 import { useToast } from '../context/ToastContext'
 import { Button, ErrorText, Field } from '../components/ui'
@@ -84,8 +84,23 @@ export function PublicProfile({ share = false, ownerUsername }) {
         method: 'POST',
         body: JSON.stringify(contact),
       })
+      let mailed = true
+      try {
+        await notifyOwnerEmail({
+          name: contact.name,
+          email: contact.email,
+          subject: contact.subject,
+          message: contact.message,
+        })
+      } catch {
+        mailed = false
+      }
       setContact({ name: '', email: '', subject: '', message: '' })
-      toast.push('Message sent. Thank you.')
+      toast.push(
+        mailed
+          ? 'Message sent. Thank you.'
+          : 'Saved in the inbox. Check Gmail (and Spam) for a FormSubmit confirmation link, then try once more.',
+      )
     } catch (err) {
       toast.push(err.message, 'error')
     } finally {
