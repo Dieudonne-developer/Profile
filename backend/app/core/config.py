@@ -32,9 +32,10 @@ class Settings(BaseSettings):
     public_app_url: str = "http://127.0.0.1:5173"
     cors_origins: str = (
         "http://localhost:5173,http://127.0.0.1:5173,"
-        "http://localhost:5174,http://127.0.0.1:5174"
+        "http://localhost:5174,http://127.0.0.1:5174,"
+        "https://profile-zzeb.vercel.app"
     )
-    cors_origin_regex: str = ""
+    cors_origin_regex: str = r"https://.*\.vercel\.app"
     upload_dir: Path = _default_upload_dir()
     ml_backend_url: str = ""
 

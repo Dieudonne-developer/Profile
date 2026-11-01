@@ -30,14 +30,26 @@ def _ensure_schema() -> None:
             )
 
 
+def _cors_origins() -> list[str]:
+    origins = list(settings.cors_origin_list)
+    for extra in (
+        "https://profile-zzeb.vercel.app",
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+    ):
+        if extra not in origins:
+            origins.append(extra)
+    return origins
+
+
 def _cors_regex() -> str | None:
     pattern = (settings.cors_origin_regex or "").strip()
     if not pattern:
-        return None
+        pattern = r"https://.*\.vercel\.app"
     try:
         re.compile(pattern)
     except re.error:
-        return None
+        return r"https://.*\.vercel\.app"
     return pattern
 
 
@@ -58,7 +70,7 @@ settings.upload_dir.mkdir(parents=True, exist_ok=True)
 app = FastAPI(title=settings.app_name, version="1.0.0", lifespan=lifespan)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.cors_origin_list,
+    allow_origins=_cors_origins(),
     allow_origin_regex=_cors_regex(),
     allow_credentials=True,
     allow_methods=["*"],
