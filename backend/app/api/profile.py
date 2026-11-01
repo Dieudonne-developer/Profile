@@ -44,6 +44,7 @@ def _public_profile(db, user: User, viewer: User | None) -> PublicProfile:
         skills=bundle["skills"],
         languages=bundle["languages"],
         projects=bundle["projects"],
+        posts=bundle["posts"],
         followers=bundle["followers"],
         following=bundle["following"],
         is_following=bundle["is_following"],

@@ -142,5 +142,25 @@
       "live_url": "",
       "featured": false
     }
+  ],
+  "posts": [
+    {
+      "title": "How I trained a banana leaf disease classifier",
+      "summary": "EfficientNet-B0, four leaf classes, and serving the model through FastAPI.",
+      "body": "I built an image classifier for banana leaf photos using EfficientNet-B0 in PyTorch. The four classes are Cordana, Healthy, Pestalotiopsis, and Sigatoka. The useful part was not only training: I wrapped the model in FastAPI and a React interface so a photo can return a prediction. That is the pattern I want to keep using — a notebook is a start, a hosted API is the product.",
+      "published": true
+    },
+    {
+      "title": "Study hours and exam scores with linear regression",
+      "summary": "A small, explainable model and an interactive predictor.",
+      "body": "Linear regression is a good first model when the question is simple: how does study time relate to exam scores? I inspected that relationship, then put the model behind an interactive predictor so someone can try different hours and see an estimated score. Explainable models still matter when you are introducing machine learning to a real workflow.",
+      "published": true
+    },
+    {
+      "title": "From Jupyter notebooks to a public ML profile",
+      "summary": "FastAPI, React, Neon Postgres, and a CV you can download.",
+      "body": "This site is the software around my machine learning work. The public profile, project cards, contact inbox, and PDF CV are all backed by FastAPI and PostgreSQL. The ML lab can talk to a Colab session when a model is loaded. I use it as a living resume: visitors can read the work, try a prediction, and write to me without creating an account.",
+      "published": true
+    }
   ]
 }

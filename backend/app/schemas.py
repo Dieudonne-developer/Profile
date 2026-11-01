@@ -211,6 +211,22 @@ class AIImproveOut(BaseModel):
     provider: str
 
 
+class BlogPostIn(BaseModel):
+    title: str = Field(min_length=3, max_length=200)
+    summary: str = Field(default="", max_length=300)
+    body: str = Field(default="", max_length=12000)
+    published: bool = True
+    sort_order: int = 0
+
+
+class BlogPostOut(BlogPostIn):
+    id: int
+    user_id: int
+    created_at: datetime
+
+    model_config = {"from_attributes": True}
+
+
 class ContactIn(BaseModel):
     name: str = Field(min_length=2, max_length=120)
     email: AppEmail
@@ -238,6 +254,7 @@ class PublicProfile(BaseModel):
     skills: list[SkillOut]
     languages: list[LanguageOut]
     projects: list[ProjectOut]
+    posts: list[BlogPostOut] = []
     followers: int
     following: int
     is_following: bool = False

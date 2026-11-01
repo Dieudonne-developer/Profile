@@ -19,6 +19,7 @@ from app.models import (
     Follow,
     Language,
     Profile,
+    BlogPost,
     Project,
     Skill,
     User,
@@ -110,6 +111,7 @@ def seed_from_resume(db: Session, data: dict) -> User:
     db.query(Skill).filter(Skill.user_id == user.id).delete()
     db.query(Language).filter(Language.user_id == user.id).delete()
     db.query(Project).filter(Project.user_id == user.id).delete()
+    db.query(BlogPost).filter(BlogPost.user_id == user.id).delete()
 
     for index, item in enumerate(data.get("experience", [])):
         db.add(Experience(user_id=user.id, sort_order=index, **item))
@@ -121,6 +123,8 @@ def seed_from_resume(db: Session, data: dict) -> User:
         db.add(Language(user_id=user.id, **item))
     for index, item in enumerate(data.get("projects", [])):
         db.add(Project(user_id=user.id, sort_order=index, **item))
+    for index, item in enumerate(data.get("posts", [])):
+        db.add(BlogPost(user_id=user.id, sort_order=index, **item))
     return user
 
 

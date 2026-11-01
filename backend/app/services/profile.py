@@ -63,6 +63,11 @@ def public_bundle(db: Session, user: User, viewer: User | None = None) -> dict:
             project_out(project, viewer.id if viewer else None)
             for project in sorted(user.projects, key=lambda item: item.sort_order)
         ],
+        "posts": [
+            post
+            for post in sorted(user.posts, key=lambda item: (item.sort_order, item.id))
+            if post.published or (viewer and viewer.id == user.id)
+        ],
         "followers": followers,
         "following": following,
         "is_following": is_following,
