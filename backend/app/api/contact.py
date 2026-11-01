@@ -4,8 +4,8 @@ from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.core.deps import get_current_user
 from app.models import ContactMessage, User
-from app.schemas import ContactIn, ContactOut
-from app.services.email import send_contact_email
+from app.schemas import ContactIn, ContactOut, MailStatusOut
+from app.services.email import send_contact_email, mail_status, test_payload
 from app.services.notify import notify
 
 router = APIRouter(prefix="/contact", tags=["contact"])
@@ -19,6 +19,22 @@ def inbox(db: Session = Depends(get_db), user: User = Depends(get_current_user))
         .order_by(ContactMessage.created_at.desc())
         .all()
     )
+
+
+@router.get("/mail-status", response_model=MailStatusOut)
+def mail_status_view(user: User = Depends(get_current_user)):
+    return mail_status(user)
+
+
+@router.post("/test-mail")
+def test_mail(user: User = Depends(get_current_user)):
+    try:
+        ok = send_contact_email(user, test_payload(user))
+    except Exception as exc:
+        raise HTTPException(status_code=400, detail=f"Gmail send failed: {exc}") from exc
+    if not ok:
+        raise HTTPException(status_code=400, detail="Gmail is not configured on the API.")
+    return {"ok": True, "to": mail_status(user)["to"]}
 
 
 @router.post("/{username}/read/{message_id}", response_model=ContactOut)

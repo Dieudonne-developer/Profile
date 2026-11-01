@@ -234,6 +234,13 @@ class ContactIn(BaseModel):
     message: str = Field(min_length=10, max_length=4000)
 
 
+class MailStatusOut(BaseModel):
+    to: str
+    smtp_ready: bool
+    https_fallback: bool
+    configured: bool
+
+
 class ContactOut(BaseModel):
     id: int
     sender_name: str

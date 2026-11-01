@@ -9,9 +9,12 @@ export function Messages() {
   const { user } = useAuth()
   const toast = useToast()
   const [items, setItems] = useState([])
+  const [mail, setMail] = useState(null)
+  const [testing, setTesting] = useState(false)
 
   useEffect(() => {
     api('/api/contact/inbox').then(setItems).catch((err) => toast.push(err.message, 'error'))
+    api('/api/contact/mail-status').then(setMail).catch(() => {})
   }, [toast])
 
   async function mark(id) {
@@ -29,6 +32,33 @@ export function Messages() {
         <h1>Messages</h1>
         <p>People who wrote from the public contact form. A copy is also sent to your Gmail.</p>
       </div>
+      <Card>
+        <p>
+          {mail?.smtp_ready
+            ? `Gmail SMTP is set for ${mail.to}.`
+            : `SMTP is not set on the live API yet. Messages still try HTTPS delivery to ${mail?.to || 'your Gmail'}.`}
+        </p>
+        <p className="muted">
+          First HTTPS delivery may send a confirmation email from FormSubmit — open Gmail and click the confirm link, including Spam.
+        </p>
+        <Button
+          type="button"
+          disabled={testing}
+          onClick={async () => {
+            setTesting(true)
+            try {
+              const result = await api('/api/contact/test-mail', { method: 'POST' })
+              toast.push(`Test sent to ${result.to}`)
+            } catch (err) {
+              toast.push(err.message, 'error')
+            } finally {
+              setTesting(false)
+            }
+          }}
+        >
+          {testing ? 'Sending…' : 'Send test email'}
+        </Button>
+      </Card>
       {items.length ? items.map((item) => (
         <Card key={item.id}>
           <div className="row space">
