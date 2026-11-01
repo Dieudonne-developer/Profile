@@ -5,6 +5,7 @@ from app.core.database import get_db
 from app.core.deps import get_current_user
 from app.models import ContactMessage, User
 from app.schemas import ContactIn, ContactOut
+from app.services.email import send_contact_email
 from app.services.notify import notify
 
 router = APIRouter(prefix="/contact", tags=["contact"])
@@ -65,4 +66,8 @@ def send_message(username: str, payload: ContactIn, db: Session = Depends(get_db
     )
     db.commit()
     db.refresh(item)
+    try:
+        send_contact_email(owner, item)
+    except Exception as exc:
+        print(f"gmail notify failed: {exc}")
     return item

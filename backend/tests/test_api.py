@@ -274,9 +274,18 @@ def test_ml_leaf_inprocess_hook(client):
         ml_routes.inprocess_leaf = None
 
 
-def test_contact_form_reaches_owner_inbox(client, tmp_path):
+def test_contact_form_reaches_owner_inbox(client, tmp_path, monkeypatch):
     unique = tmp_path.name.replace("-", "")[:8]
     payload, headers = _register(client, f"owner{unique}")
+    mailed = {}
+
+    def fake_send(owner, item):
+        mailed["to"] = owner.email
+        mailed["from"] = item.sender_email
+        mailed["body"] = item.body
+        return True
+
+    monkeypatch.setattr("app.api.contact.send_contact_email", fake_send)
     sent = client.post(
         f"/api/contact/{payload['username']}",
         json={
@@ -292,6 +301,8 @@ def test_contact_form_reaches_owner_inbox(client, tmp_path):
     assert inbox.json()[0]["sender_email"] == "hiring@example.com"
     notes = client.get("/api/notifications", headers=headers)
     assert any(item["type"] == "contact" for item in notes.json())
+    assert mailed["from"] == "hiring@example.com"
+    assert "internship" in mailed["body"].lower()
 
 
 def test_blog_posts_appear_on_public_profile(client, tmp_path):

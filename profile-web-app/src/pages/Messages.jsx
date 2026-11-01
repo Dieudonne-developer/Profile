@@ -27,7 +27,7 @@ export function Messages() {
     <div className="stack">
       <div className="page-title">
         <h1>Messages</h1>
-        <p>People who wrote from the public contact form.</p>
+        <p>People who wrote from the public contact form. A copy is also sent to your Gmail.</p>
       </div>
       {items.length ? items.map((item) => (
         <Card key={item.id}>

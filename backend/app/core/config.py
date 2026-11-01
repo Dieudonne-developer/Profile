@@ -39,6 +39,12 @@ class Settings(BaseSettings):
     upload_dir: Path = _default_upload_dir()
     ml_backend_url: str = ""
     allow_registration: bool = False
+    smtp_host: str = "smtp.gmail.com"
+    smtp_port: int = 587
+    smtp_username: str = "ntarindwajean11@gmail.com"
+    smtp_password: str = ""
+    smtp_from: str = "ntarindwajean11@gmail.com"
+    notify_email: str = "ntarindwajean11@gmail.com"
 
     @property
     def cors_origin_list(self) -> list[str]:
