@@ -7,6 +7,25 @@ name = "portfolio-api"
 version = "1.0.0"
 description = "FastAPI backend for the professional portfolio platform"
 requires-python = ">=3.12"
+dependencies = [
+  "fastapi>=0.115",
+  "uvicorn>=0.34",
+  "sqlalchemy>=2.0",
+  "psycopg>=3.2",
+  "psycopg-binary>=3.2",
+  "alembic>=1.14",
+  "pydantic>=2.10",
+  "pydantic-settings>=2.7",
+  "python-dotenv>=1.0",
+  "email-validator>=2.2",
+  "python-multipart>=0.0.18",
+  "PyJWT>=2.10",
+  "httpx>=0.28",
+  "reportlab>=4.2",
+]
 
 [tool.setuptools.packages.find]
 include = ["app*"]
+
+[tool.vercel]
+entrypoint = "app.main:app"
