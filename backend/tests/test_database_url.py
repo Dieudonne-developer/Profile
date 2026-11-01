@@ -10,6 +10,7 @@ def test_normalize_neon_postgres_url():
     assert url.startswith("postgresql+psycopg://")
     assert "sslmode=require" in url
     assert "neon.tech" in url
+    assert "channel_binding" not in url
     assert not url.startswith('"')
 
 

@@ -31,6 +31,7 @@ def normalize_database_url(url: str) -> str:
         parts = urlsplit(cleaned)
         query = dict(parse_qsl(parts.query, keep_blank_values=True))
         query.setdefault("sslmode", "require")
+        query.pop("channel_binding", None)
         cleaned = urlunsplit(
             (parts.scheme, parts.netloc, parts.path, urlencode(query), parts.fragment)
         )

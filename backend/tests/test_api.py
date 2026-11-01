@@ -30,6 +30,8 @@ def test_health(client):
     home = client.get("/")
     assert home.status_code == 200
     assert home.json()["status"] == "ok"
+    icon = client.get("/favicon.ico")
+    assert icon.status_code == 204
 
 
 def test_register_login_and_profile(client, tmp_path):

@@ -1,9 +1,12 @@
 from contextlib import asynccontextmanager
+import os
+import re
+import traceback
 
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, Response
 from fastapi.staticfiles import StaticFiles
 from sqlalchemy import inspect, text
 
@@ -27,30 +30,53 @@ def _ensure_schema() -> None:
             )
 
 
+def _cors_regex() -> str | None:
+    pattern = (settings.cors_origin_regex or "").strip()
+    if not pattern:
+        return None
+    try:
+        re.compile(pattern)
+    except re.error:
+        return None
+    return pattern
+
+
 @asynccontextmanager
 async def lifespan(_app: FastAPI):
     settings.upload_dir.mkdir(parents=True, exist_ok=True)
-    _ensure_schema()
+    # Vercel cold starts cannot wait on DDL against Neon.
+    if not os.getenv("VERCEL"):
+        try:
+            _ensure_schema()
+        except Exception as exc:
+            print(f"schema init skipped: {exc}")
     yield
 
+
+settings.upload_dir.mkdir(parents=True, exist_ok=True)
 
 app = FastAPI(title=settings.app_name, version="1.0.0", lifespan=lifespan)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.cors_origin_list,
-    allow_origin_regex=settings.cors_origin_regex or None,
+    allow_origin_regex=_cors_regex(),
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 app.include_router(api_router)
-app.mount("/media", StaticFiles(directory=settings.upload_dir), name="media")
+app.mount(
+    "/media",
+    StaticFiles(directory=str(settings.upload_dir), check_dir=False),
+    name="media",
+)
 
 
 @app.exception_handler(Exception)
 async def unhandled(_request: Request, exc: Exception):
     if isinstance(exc, (HTTPException, RequestValidationError)):
         raise exc
+    print(traceback.format_exc())
     return JSONResponse(status_code=500, content={"detail": "Something went wrong. Please try again."})
 
 
@@ -62,6 +88,11 @@ def root():
         "docs": "/docs",
         "health": "/api/health",
     }
+
+
+@app.get("/favicon.ico")
+def favicon():
+    return Response(status_code=204)
 
 
 @app.get("/api/health")
