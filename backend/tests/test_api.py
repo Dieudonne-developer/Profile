@@ -294,6 +294,39 @@ def test_contact_form_reaches_owner_inbox(client, tmp_path):
     assert any(item["type"] == "contact" for item in notes.json())
 
 
+def test_blog_posts_appear_on_public_profile(client, tmp_path):
+    unique = tmp_path.name.replace("-", "")[:8]
+    payload, headers = _register(client, f"blog{unique}")
+    created = client.post(
+        "/api/posts",
+        headers=headers,
+        json={
+            "title": "Serving a PyTorch model",
+            "summary": "FastAPI around EfficientNet-B0",
+            "body": "I wrap the banana leaf classifier in FastAPI so a photo can return a prediction.",
+            "published": True,
+        },
+    )
+    assert created.status_code == 201, created.text
+    draft = client.post(
+        "/api/posts",
+        headers=headers,
+        json={
+            "title": "Unpublished draft",
+            "summary": "Hidden",
+            "body": "This should not appear on the public page.",
+            "published": False,
+        },
+    )
+    assert draft.status_code == 201, draft.text
+    public = client.get(f"/api/u/{payload['username']}")
+    titles = [item["title"] for item in public.json()["posts"]]
+    assert "Serving a PyTorch model" in titles
+    assert "Unpublished draft" not in titles
+    mine = client.get("/api/posts", headers=headers)
+    assert len(mine.json()) == 2
+
+
 def test_public_registration_can_be_closed(client):
     from app.core.config import get_settings
 

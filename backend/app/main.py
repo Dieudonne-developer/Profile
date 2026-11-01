@@ -1,7 +1,9 @@
 from contextlib import asynccontextmanager
+import json
 import os
 import re
 import traceback
+from pathlib import Path
 
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.exceptions import RequestValidationError
@@ -12,7 +14,7 @@ from sqlalchemy import inspect, text
 
 from app.api import api_router
 from app.core.config import get_settings
-from app.core.database import Base, engine
+from app.core.database import Base, SessionLocal, engine
 
 settings = get_settings()
 
@@ -28,6 +30,33 @@ def _ensure_schema() -> None:
             connection.execute(
                 text("ALTER TABLE profiles ADD COLUMN birthday VARCHAR(40) DEFAULT '2002-01-01'")
             )
+    _ensure_default_posts()
+
+
+def _ensure_default_posts() -> None:
+    from app.models import BlogPost, User
+
+    resume_path = Path(__file__).resolve().parents[1] / "data" / "resume.json"
+    if not resume_path.exists():
+        return
+    posts = json.loads(resume_path.read_text(encoding="utf-8")).get("posts") or []
+    if not posts:
+        return
+    db = SessionLocal()
+    try:
+        if db.query(BlogPost).count():
+            return
+        for user in db.query(User).all():
+            if user.username.lower() == "guest":
+                continue
+            for index, item in enumerate(posts):
+                db.add(BlogPost(user_id=user.id, sort_order=index, **item))
+        db.commit()
+    except Exception as exc:
+        db.rollback()
+        print(f"blog seed skipped: {exc}")
+    finally:
+        db.close()
 
 
 def _cors_origins() -> list[str]:

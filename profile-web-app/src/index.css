@@ -243,6 +243,13 @@ img { max-width: 100%; display: block; }
   padding: 22px 16px 18px;
   min-height: 170px;
 }
+.blog-list { display: grid; gap: 18px; }
+.blog-post {
+  border: 1px solid var(--line);
+  padding: 20px 18px 16px;
+}
+.blog-post h3 { margin: 4px 0 10px; font-size: 20px; }
+.blog-summary { font-weight: 600; margin: 0 0 10px; }
 .service svg { margin-bottom: 14px; }
 .service h3 { margin: 0 0 8px; font-size: 16px; font-weight: 600; }
 .service p { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.5; }

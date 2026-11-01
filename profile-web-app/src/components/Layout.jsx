@@ -5,6 +5,7 @@ import {
   BrainCircuit,
   ChartColumn,
   Mail,
+  Newspaper,
   FolderKanban,
   House,
   LogOut,
@@ -26,6 +27,7 @@ const links = [
   { to: '/app/analytics', label: 'Analytics', icon: ChartColumn },
   { to: '/app/ml', label: 'ML lab', icon: BrainCircuit },
   { to: '/app/messages', label: 'Messages', icon: Mail },
+  { to: '/app/blog', label: 'Blog', icon: Newspaper },
 ]
 
 export function Layout() {

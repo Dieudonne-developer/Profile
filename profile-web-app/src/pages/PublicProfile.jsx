@@ -16,7 +16,7 @@ import { Button, ErrorText, Field } from '../components/ui'
 import { SectionTitle, VCardShell } from '../components/VCardLayout'
 import { EducationBlock, ExperienceBlock, LanguagesBlock, SkillsBlock } from '../components/ProfileView'
 import { ProjectCard } from '../components/ProjectCard'
-import { rangeLabel } from '../lib/format'
+import { formatDate } from '../lib/format'
 
 const SERVICE_ICONS = [BrainCircuit, ScanLine, Cpu, Code2]
 
@@ -175,13 +175,21 @@ export function PublicProfile({ share = false, ownerUsername }) {
 
       <section className="panel" id="blog">
         <SectionTitle lead="Latest" accent="Notes" />
-        {(data.experiences || []).slice(0, 2).map((item) => (
-          <article key={item.id} style={{ marginBottom: 18 }}>
-            <h3 style={{ margin: '0 0 6px' }}>{item.title}</h3>
-            <p className="muted">{rangeLabel(item.start_date, item.end_date, item.is_current)}</p>
-            <p>{item.description}</p>
-          </article>
-        ))}
+        {(data.posts || []).length ? (
+          <div className="blog-list">
+            {data.posts.map((post) => (
+              <article className="blog-post" key={post.id}>
+                <p className="muted">{formatDate(post.created_at)}</p>
+                <h3>{post.title}</h3>
+                {post.summary ? <p className="blog-summary">{post.summary}</p> : null}
+                <p style={{ whiteSpace: 'pre-wrap' }}>{post.body}</p>
+              </article>
+            ))}
+          </div>
+        ) : (
+          <p className="muted">Notes about machine learning projects and study will appear here.</p>
+        )}
+        {isOwner ? <p style={{ marginTop: 16 }}><Link className="btn btn-ghost" to="/app/blog">Write a post</Link></p> : null}
       </section>
 
       <section className="panel" id="contact">

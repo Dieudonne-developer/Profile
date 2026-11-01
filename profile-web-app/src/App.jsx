@@ -13,6 +13,7 @@ import { Analytics } from './pages/Analytics'
 import { PublicProfile } from './pages/PublicProfile'
 import { MlLab } from './pages/MlLab'
 import { Messages } from './pages/Messages'
+import { BlogPage } from './pages/BlogPage'
 
 export default function App() {
   return (
@@ -40,6 +41,7 @@ export default function App() {
         <Route path="analytics" element={<Analytics />} />
         <Route path="ml" element={<MlLab />} />
         <Route path="messages" element={<Messages />} />
+        <Route path="blog" element={<BlogPage />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
