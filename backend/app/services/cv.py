@@ -1,11 +1,14 @@
 from io import BytesIO
+from pathlib import Path
 
+from PIL import Image as PILImage
 from reportlab.lib.colors import HexColor, white
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
 from reportlab.lib.units import mm
 from reportlab.platypus import (
     Image,
+    KeepTogether,
     PageBreak,
     Paragraph,
     SimpleDocTemplate,
@@ -17,6 +20,27 @@ from reportlab.platypus import (
 NAVY = HexColor("#0f172a")
 TEAL = HexColor("#0f766e")
 MUTED = HexColor("#475569")
+ROOT = Path(__file__).resolve().parents[3]
+
+
+def _portrait_path(bundle: dict) -> str:
+    candidates = []
+    given = bundle.get("photo_path") or ""
+    if given:
+        candidates.append(Path(given))
+    app_dir = Path(__file__).resolve().parents[1]
+    candidates.extend(
+        [
+            app_dir / "static" / "avatar.jpg",
+            ROOT / "profile-web-app" / "public" / "avatar.jpg",
+            ROOT / "backend" / "app" / "static" / "uploads" / "avatar.jpg",
+            app_dir / "static" / "uploads" / "avatar.jpg",
+        ]
+    )
+    for path in candidates:
+        if path.exists() and path.is_file():
+            return str(path)
+    return ""
 
 
 def build_cv_pdf(bundle: dict) -> bytes:
@@ -51,27 +75,72 @@ def build_cv_pdf(bundle: dict) -> bytes:
     )
 
     profile = bundle["profile"]
-    story = [
+    contact = Paragraph(
+        " · ".join(
+            filter(
+                None,
+                [
+                    profile.get("location"),
+                    profile.get("public_email"),
+                    profile.get("phone"),
+                    f"Birthday: {profile.get('birthday')}" if profile.get("birthday") else "",
+                ],
+            )
+        ),
+        body,
+    )
+    links = Paragraph(
+        " · ".join(
+            filter(
+                None,
+                [
+                    profile.get("website"),
+                    profile.get("github"),
+                    profile.get("linkedin"),
+                    profile.get("twitter"),
+                ],
+            )
+        ),
+        body,
+    )
+    identity = [
         Paragraph(profile.get("full_name") or bundle["user"]["username"], title),
         Paragraph(profile.get("headline") or "", headline),
-        Paragraph(
-            " · ".join(
-                filter(
-                    None,
+        contact,
+        links,
+    ]
+    photo_file = _portrait_path(bundle)
+    if photo_file:
+        try:
+            with PILImage.open(photo_file) as raw:
+                ratio = raw.height / max(raw.width, 1)
+            width = 34 * mm
+            height = min(max(width * ratio, 34 * mm), 46 * mm)
+            portrait = Image(photo_file, width=width, height=height)
+            intro = Table(
+                [[identity, portrait]],
+                colWidths=[doc.width - width - 6 * mm, width + 4 * mm],
+            )
+            intro.setStyle(
+                TableStyle(
                     [
-                        profile.get("location"),
-                        profile.get("public_email"),
-                        profile.get("phone"),
-                        f"Birthday: {profile.get('birthday')}" if profile.get("birthday") else "",
-                        profile.get("website"),
-                        profile.get("github"),
-                        profile.get("linkedin"),
-                        profile.get("twitter"),
-                    ],
+                        ("VALIGN", (0, 0), (-1, -1), "TOP"),
+                        ("ALIGN", (1, 0), (1, 0), "RIGHT"),
+                        ("LEFTPADDING", (0, 0), (-1, -1), 0),
+                        ("RIGHTPADDING", (0, 0), (0, 0), 8),
+                        ("LEFTPADDING", (1, 0), (1, 0), 4),
+                        ("RIGHTPADDING", (1, 0), (1, 0), 0),
+                    ]
                 )
-            ),
-            body,
-        ),
+            )
+            heading = [KeepTogether(intro)]
+        except Exception:
+            heading = identity
+    else:
+        heading = identity
+
+    story = [
+        *heading,
         Spacer(1, 6),
         Paragraph("Professional summary", h2),
         Paragraph((profile.get("bio") or "").replace("\n", "<br/>"), body),
@@ -139,28 +208,6 @@ def build_cv_pdf(bundle: dict) -> bytes:
     header.setStyle(TableStyle([("BACKGROUND", (0, 0), (-1, -1), TEAL)]))
     story.insert(0, header)
     story.insert(1, Spacer(1, 8))
-
-    photo_path = bundle.get("photo_path")
-    if photo_path:
-        try:
-            portrait = Image(photo_path, width=28 * mm, height=28 * mm)
-            heading = story[2:5]
-            intro = Table(
-                [[portrait, heading]],
-                colWidths=[32 * mm, doc.width - 32 * mm],
-            )
-            intro.setStyle(
-                TableStyle(
-                    [
-                        ("VALIGN", (0, 0), (-1, -1), "TOP"),
-                        ("LEFTPADDING", (0, 0), (-1, -1), 0),
-                        ("RIGHTPADDING", (0, 0), (0, 0), 8),
-                    ]
-                )
-            )
-            story[2:5] = [intro]
-        except Exception:
-            pass
 
     def _footer(canvas, _doc):
         canvas.saveState()
