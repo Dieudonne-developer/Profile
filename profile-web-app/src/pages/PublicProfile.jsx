@@ -68,6 +68,14 @@ export function PublicProfile({ share = false, ownerUsername }) {
     load()
   }, [username, token, share])
 
+  useEffect(() => {
+    if (!data) return
+    const id = window.location.hash.replace('#', '')
+    if (!id) return
+    const node = document.getElementById(id)
+    if (node) node.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }, [data])
+
   async function sendMessage(event) {
     event.preventDefault()
     setSending(true)

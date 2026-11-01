@@ -62,7 +62,7 @@ function Decor() {
 
 export function VCardNav({ username, profile, hireHref }) {
   const location = useLocation()
-  const home = username ? `/u/${username}` : '/'
+  const home = location.pathname.startsWith('/u/') && username ? `/u/${username}` : '/'
   const item = (hash, label) => {
     const href = `${home}${hash}`
     const active = location.hash === hash || (hash === '#about' && location.hash === '')
