@@ -1,5 +1,10 @@
 const TOKEN_KEY = 'portfolio.token'
-const API_BASE = (import.meta.env.VITE_API_BASE || '').replace(/\/$/, '')
+const PRODUCTION_API = 'https://profile-nine-lake-75.vercel.app'
+const fromEnv = (import.meta.env.VITE_API_BASE || '').replace(/\/$/, '')
+const stalePreview = fromEnv.includes('profile-qt8o8gs3x')
+const API_BASE = (
+  stalePreview ? PRODUCTION_API : fromEnv || (import.meta.env.PROD ? PRODUCTION_API : '')
+).replace(/\/$/, '')
 
 export function apiUrl(path) {
   if (!path) return API_BASE || '/'
