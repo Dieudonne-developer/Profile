@@ -69,12 +69,16 @@ export function ProjectCard({ project, onChange, canEdit, onEdit, onDelete }) {
       </div>
       <div className="row space">
         <div className="row">
-          <Button variant="ghost" type="button" onClick={toggleLike}>
-            <Heart size={16} fill={project.liked ? 'currentColor' : 'none'} /> {project.likes || 0}
-          </Button>
-          <Button variant="ghost" type="button" onClick={loadComments}>
-            <MessageCircle size={16} /> {project.comments || 0}
-          </Button>
+          {user ? (
+            <>
+              <Button variant="ghost" type="button" onClick={toggleLike}>
+                <Heart size={16} fill={project.liked ? 'currentColor' : 'none'} /> {project.likes || 0}
+              </Button>
+              <Button variant="ghost" type="button" onClick={loadComments}>
+                <MessageCircle size={16} /> {project.comments || 0}
+              </Button>
+            </>
+          ) : null}
           {project.repo_url ? (
             <a className="btn btn-ghost" href={project.repo_url} target="_blank" rel="noreferrer">Repo</a>
           ) : null}

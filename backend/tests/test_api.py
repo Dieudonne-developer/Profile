@@ -272,3 +272,44 @@ def test_ml_leaf_inprocess_hook(client):
         assert result.json()["label"] == "Healthy"
     finally:
         ml_routes.inprocess_leaf = None
+
+
+def test_contact_form_reaches_owner_inbox(client, tmp_path):
+    unique = tmp_path.name.replace("-", "")[:8]
+    payload, headers = _register(client, f"owner{unique}")
+    sent = client.post(
+        f"/api/contact/{payload['username']}",
+        json={
+            "name": "Hiring Manager",
+            "email": "hiring@example.com",
+            "subject": "Internship",
+            "message": "We would like to discuss an ML internship with you.",
+        },
+    )
+    assert sent.status_code == 201, sent.text
+    inbox = client.get("/api/contact/inbox", headers=headers)
+    assert inbox.status_code == 200
+    assert inbox.json()[0]["sender_email"] == "hiring@example.com"
+    notes = client.get("/api/notifications", headers=headers)
+    assert any(item["type"] == "contact" for item in notes.json())
+
+
+def test_public_registration_can_be_closed(client):
+    from app.core.config import get_settings
+
+    settings = get_settings()
+    previous = settings.allow_registration
+    settings.allow_registration = False
+    try:
+        blocked = client.post(
+            "/api/auth/register",
+            json={
+                "email": "new@example.com",
+                "username": "newperson",
+                "password": "SecurePass1",
+                "full_name": "New Person",
+            },
+        )
+        assert blocked.status_code == 403
+    finally:
+        settings.allow_registration = previous

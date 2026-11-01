@@ -4,6 +4,7 @@ import {
   Bell,
   BrainCircuit,
   ChartColumn,
+  Mail,
   FolderKanban,
   House,
   LogOut,
@@ -24,6 +25,7 @@ const links = [
   { to: '/app/notifications', label: 'Notifications', icon: Bell },
   { to: '/app/analytics', label: 'Analytics', icon: ChartColumn },
   { to: '/app/ml', label: 'ML lab', icon: BrainCircuit },
+  { to: '/app/messages', label: 'Messages', icon: Mail },
 ]
 
 export function Layout() {
@@ -119,14 +121,9 @@ export function PublicNav() {
             Dashboard
           </NavLink>
         ) : (
-          <>
-            <NavLink className="btn btn-ghost" to="/login">
-              Sign in
-            </NavLink>
-            <NavLink className="btn btn-primary" to="/register">
-              Create account
-            </NavLink>
-          </>
+          <NavLink className="btn btn-primary" to="/#contact">
+            Contact
+          </NavLink>
         )}
       </div>
     </header>

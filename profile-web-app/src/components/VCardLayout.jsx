@@ -2,7 +2,6 @@ import { Download, Glasses, Globe, House, Send } from 'lucide-react'
 import { Link, useLocation } from 'react-router-dom'
 import { mediaUrl, photoFallback } from '../api'
 import { formatBirthday } from '../lib/format'
-import { useAuth } from '../context/AuthContext'
 
 function BrandIcon({ size = 16, children, ...props }) {
   return (
@@ -61,9 +60,8 @@ function Decor() {
   )
 }
 
-export function VCardNav({ username, email, profile, hireHref }) {
+export function VCardNav({ username, profile, hireHref }) {
   const location = useLocation()
-  const { user } = useAuth()
   const home = username ? `/u/${username}` : '/'
   const item = (hash, label) => {
     const href = `${home}${hash}`
@@ -91,7 +89,7 @@ export function VCardNav({ username, email, profile, hireHref }) {
         {profile?.linkedin ? <a href={profile.linkedin} target="_blank" rel="noreferrer" aria-label="LinkedIn"><Linkedin size={16} /></a> : <Linkedin size={16} />}
         {profile?.github ? <a href={profile.github} target="_blank" rel="noreferrer" aria-label="GitHub"><Github size={16} /></a> : <Github size={16} />}
       </div>
-      <a className="btn-hire" href={hireHref || (email ? `mailto:${email}` : user ? '/app' : '/login')}>
+      <a className="btn-hire" href={hireHref || `${home}#contact`}>
         Contact Me <Send size={14} />
       </a>
     </header>

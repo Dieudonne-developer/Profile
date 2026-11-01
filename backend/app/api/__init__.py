@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 
-from app.api import ai, analytics, auth, cv, ml, network, notifications, profile, projects
+from app.api import ai, analytics, auth, contact, cv, ml, network, notifications, profile, projects
 
 api_router = APIRouter(prefix="/api")
 api_router.include_router(auth.router)
@@ -12,3 +12,4 @@ api_router.include_router(notifications.router)
 api_router.include_router(ai.router)
 api_router.include_router(cv.router)
 api_router.include_router(ml.router)
+api_router.include_router(contact.router)

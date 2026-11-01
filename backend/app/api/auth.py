@@ -3,6 +3,7 @@ from secrets import token_urlsafe
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
+from app.core.config import get_settings
 from app.core.database import get_db
 from app.core.deps import get_current_user
 from app.core.security import create_access_token, hash_password, verify_password
@@ -14,6 +15,11 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 
 @router.post("/register", response_model=Token, status_code=status.HTTP_201_CREATED)
 def register(payload: UserCreate, db: Session = Depends(get_db)):
+    if not get_settings().allow_registration:
+        raise HTTPException(
+            status_code=403,
+            detail="This is a personal portfolio. New accounts cannot be created.",
+        )
     username = payload.username.strip().lower()
     email = payload.email.lower()
     if db.query(User).filter(User.email == email).first():

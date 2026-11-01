@@ -50,6 +50,9 @@ class User(Base):
     notifications: Mapped[list["Notification"]] = relationship(
         back_populates="user", cascade="all, delete-orphan"
     )
+    messages: Mapped[list["ContactMessage"]] = relationship(
+        back_populates="owner", cascade="all, delete-orphan"
+    )
 
 
 class Profile(Base):
@@ -211,6 +214,23 @@ class Notification(Base):
     )
 
     user: Mapped[User] = relationship(back_populates="notifications")
+
+
+class ContactMessage(Base):
+    __tablename__ = "contact_messages"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    owner_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True)
+    sender_name: Mapped[str] = mapped_column(String(120))
+    sender_email: Mapped[str] = mapped_column(String(255))
+    subject: Mapped[str] = mapped_column(String(160), default="")
+    body: Mapped[str] = mapped_column(Text)
+    is_read: Mapped[bool] = mapped_column(Boolean, default=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now()
+    )
+
+    owner: Mapped[User] = relationship(back_populates="messages")
 
 
 class AnalyticsEvent(Base):

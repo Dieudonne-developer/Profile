@@ -211,6 +211,25 @@ class AIImproveOut(BaseModel):
     provider: str
 
 
+class ContactIn(BaseModel):
+    name: str = Field(min_length=2, max_length=120)
+    email: AppEmail
+    subject: str = Field(default="", max_length=160)
+    message: str = Field(min_length=10, max_length=4000)
+
+
+class ContactOut(BaseModel):
+    id: int
+    sender_name: str
+    sender_email: str
+    subject: str
+    body: str
+    is_read: bool
+    created_at: datetime
+
+    model_config = {"from_attributes": True}
+
+
 class PublicProfile(BaseModel):
     user: UserOut
     profile: ProfileOut

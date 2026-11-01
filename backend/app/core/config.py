@@ -38,6 +38,7 @@ class Settings(BaseSettings):
     cors_origin_regex: str = r"https://.*\.vercel\.app"
     upload_dir: Path = _default_upload_dir()
     ml_backend_url: str = ""
+    allow_registration: bool = False
 
     @property
     def cors_origin_list(self) -> list[str]:

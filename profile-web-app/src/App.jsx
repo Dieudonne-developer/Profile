@@ -12,13 +12,14 @@ import { Notifications } from './pages/Notifications'
 import { Analytics } from './pages/Analytics'
 import { PublicProfile } from './pages/PublicProfile'
 import { MlLab } from './pages/MlLab'
+import { Messages } from './pages/Messages'
 
 export default function App() {
   return (
     <Routes>
       <Route path="/" element={<Landing />} />
-      <Route path="/login" element={<AuthPage mode="login" />} />
-      <Route path="/register" element={<AuthPage mode="register" />} />
+      <Route path="/login" element={<AuthPage />} />
+      <Route path="/register" element={<Navigate to="/" replace />} />
       <Route path="/u/:username" element={<PublicProfile />} />
       <Route path="/s/:token" element={<PublicProfile share />} />
       <Route path="/lab" element={<MlLab />} />
@@ -38,6 +39,7 @@ export default function App() {
         <Route path="notifications" element={<Notifications />} />
         <Route path="analytics" element={<Analytics />} />
         <Route path="ml" element={<MlLab />} />
+        <Route path="messages" element={<Messages />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

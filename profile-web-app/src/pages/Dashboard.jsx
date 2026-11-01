@@ -57,6 +57,7 @@ export function Dashboard() {
           </Button>
           <Link className="btn btn-ghost" to="/app/profile">Edit profile</Link>
           <Link className="btn btn-ghost" to="/app/ml">ML lab</Link>
+          <Link className="btn btn-ghost" to="/app/messages">Messages</Link>
         </div>
       </section>
       <section className="grid stats-row">

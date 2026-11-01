@@ -56,12 +56,10 @@ def _cors_regex() -> str | None:
 @asynccontextmanager
 async def lifespan(_app: FastAPI):
     settings.upload_dir.mkdir(parents=True, exist_ok=True)
-    # Vercel cold starts cannot wait on DDL against Neon.
-    if not os.getenv("VERCEL"):
-        try:
-            _ensure_schema()
-        except Exception as exc:
-            print(f"schema init skipped: {exc}")
+    try:
+        _ensure_schema()
+    except Exception as exc:
+        print(f"schema init skipped: {exc}")
     yield
 
 

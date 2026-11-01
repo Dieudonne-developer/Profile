@@ -12,7 +12,7 @@ import {
 import { api, downloadCv, trackEvent } from '../api'
 import { useAuth } from '../context/AuthContext'
 import { useToast } from '../context/ToastContext'
-import { Button, ErrorText } from '../components/ui'
+import { Button, ErrorText, Field } from '../components/ui'
 import { SectionTitle, VCardShell } from '../components/VCardLayout'
 import { EducationBlock, ExperienceBlock, LanguagesBlock, SkillsBlock } from '../components/ProfileView'
 import { ProjectCard } from '../components/ProjectCard'
@@ -50,6 +50,8 @@ export function PublicProfile({ share = false, ownerUsername }) {
   const toast = useToast()
   const [data, setData] = useState(null)
   const [error, setError] = useState('')
+  const [contact, setContact] = useState({ name: '', email: '', subject: '', message: '' })
+  const [sending, setSending] = useState(false)
 
   async function load() {
     try {
@@ -66,17 +68,20 @@ export function PublicProfile({ share = false, ownerUsername }) {
     load()
   }, [username, token, share])
 
-  async function follow() {
-    if (!user) return toast.push('Sign in to follow people', 'error')
+  async function sendMessage(event) {
+    event.preventDefault()
+    setSending(true)
     try {
-      const result = await api(`/api/network/follow/${data.user.username}`, { method: 'POST' })
-      setData((current) => ({
-        ...current,
-        is_following: result.is_following,
-        followers: result.followers,
-      }))
+      await api(`/api/contact/${data.user.username}`, {
+        method: 'POST',
+        body: JSON.stringify(contact),
+      })
+      setContact({ name: '', email: '', subject: '', message: '' })
+      toast.push('Message sent. Thank you.')
     } catch (err) {
       toast.push(err.message, 'error')
+    } finally {
+      setSending(false)
     }
   }
 
@@ -120,13 +125,7 @@ export function PublicProfile({ share = false, ownerUsername }) {
           {data.profile.github ? (
             <a className="btn btn-ghost" href={data.profile.github} target="_blank" rel="noreferrer">View GitHub</a>
           ) : null}
-          {!isOwner ? (
-            <Button variant="dark" type="button" onClick={follow}>
-              {data.is_following ? 'Following' : 'Follow'} · {data.followers}
-            </Button>
-          ) : (
-            <Link className="btn btn-ghost" to="/app">Dashboard</Link>
-          )}
+          {isOwner ? <Link className="btn btn-ghost" to="/app">Dashboard</Link> : null}
         </div>
       </section>
 
@@ -189,7 +188,7 @@ export function PublicProfile({ share = false, ownerUsername }) {
         <SectionTitle lead="Get in" accent="Touch" />
         <p>
           I am looking for junior and internship roles in machine learning, AI engineering, and data science.
-          Email me or use the links above for GitHub, LinkedIn, and X.
+          Send a message here and I will receive it in my admin inbox.
         </p>
         {data.profile.public_email ? (
           <p className="row">
@@ -201,6 +200,40 @@ export function PublicProfile({ share = false, ownerUsername }) {
         {data.profile.phone ? (
           <p className="row"><CalendarClock size={16} /> {data.profile.phone}</p>
         ) : null}
+        <form className="stack" style={{ marginTop: 18, maxWidth: 560 }} onSubmit={sendMessage}>
+          <Field label="Your name">
+            <input
+              value={contact.name}
+              onChange={(event) => setContact((current) => ({ ...current, name: event.target.value }))}
+              required
+              minLength={2}
+            />
+          </Field>
+          <Field label="Your email">
+            <input
+              type="email"
+              value={contact.email}
+              onChange={(event) => setContact((current) => ({ ...current, email: event.target.value }))}
+              required
+            />
+          </Field>
+          <Field label="Subject">
+            <input
+              value={contact.subject}
+              onChange={(event) => setContact((current) => ({ ...current, subject: event.target.value }))}
+              placeholder="Internship, collaboration, question…"
+            />
+          </Field>
+          <Field label="Message">
+            <textarea
+              value={contact.message}
+              onChange={(event) => setContact((current) => ({ ...current, message: event.target.value }))}
+              required
+              minLength={10}
+            />
+          </Field>
+          <Button type="submit" disabled={sending}>{sending ? 'Sending…' : 'Send message'}</Button>
+        </form>
       </section>
     </VCardShell>
   )
