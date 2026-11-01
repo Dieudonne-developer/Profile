@@ -43,8 +43,12 @@ class Settings(BaseSettings):
     smtp_port: int = 587
     smtp_username: str = "ntarindwajean11@gmail.com"
     smtp_password: str = ""
+    gmail_app_password: str = ""
     smtp_from: str = "ntarindwajean11@gmail.com"
     notify_email: str = "ntarindwajean11@gmail.com"
+
+    def mail_password(self) -> str:
+        return (self.smtp_password or self.gmail_app_password or "").replace(" ", "").strip()
 
     @property
     def cors_origin_list(self) -> list[str]:

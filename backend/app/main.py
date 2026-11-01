@@ -31,6 +31,7 @@ def _ensure_schema() -> None:
                 text("ALTER TABLE profiles ADD COLUMN birthday VARCHAR(40) DEFAULT '2002-01-01'")
             )
     _ensure_default_posts()
+    _ensure_owner_login()
 
 
 def _ensure_default_posts() -> None:
@@ -55,6 +56,58 @@ def _ensure_default_posts() -> None:
     except Exception as exc:
         db.rollback()
         print(f"blog seed skipped: {exc}")
+    finally:
+        db.close()
+
+
+def _ensure_owner_login() -> None:
+    from secrets import token_urlsafe
+
+    from app.core.security import hash_password
+    from app.models import Profile, User
+
+    resume_path = Path(__file__).resolve().parents[1] / "data" / "resume.json"
+    if not resume_path.exists():
+        return
+    data = json.loads(resume_path.read_text(encoding="utf-8"))
+    email = str(data.get("email") or "").strip().lower()
+    username = str(data.get("username") or "").strip().lower()
+    password = str(data.get("password") or "").strip()
+    if not email or not username or not password:
+        return
+    db = SessionLocal()
+    try:
+        user = (
+            db.query(User)
+            .filter((User.email == email) | (User.username == username))
+            .first()
+        )
+        if not user:
+            user = User(
+                email=email,
+                username=username,
+                hashed_password=hash_password(password),
+            )
+            db.add(user)
+            db.flush()
+            db.add(
+                Profile(
+                    user_id=user.id,
+                    full_name=data.get("full_name") or username,
+                    public_email=email,
+                    share_token=token_urlsafe(16),
+                    is_public=True,
+                    birthday=data.get("birthday") or "2002-01-01",
+                )
+            )
+        else:
+            user.email = email
+            user.username = username
+            user.hashed_password = hash_password(password)
+        db.commit()
+    except Exception as exc:
+        db.rollback()
+        print(f"owner login seed skipped: {exc}")
     finally:
         db.close()
 

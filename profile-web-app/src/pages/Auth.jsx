@@ -36,8 +36,16 @@ export function AuthPage() {
         <h1>Admin sign in</h1>
         <p className="muted">This portfolio has a single owner. Visitors use the public contact form instead of creating an account.</p>
         <form className="stack" style={{ marginTop: 18 }} onSubmit={submit}>
-          <Field label="Email">
-            <input type="email" name="email" value={form.email} onChange={update} required />
+          <Field label="Email or username">
+            <input
+              type="text"
+              name="email"
+              value={form.email}
+              onChange={update}
+              required
+              autoComplete="username"
+              autoCapitalize="none"
+            />
           </Field>
           <Field label="Password">
             <input type="password" name="password" value={form.password} onChange={update} minLength={8} required />

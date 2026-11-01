@@ -1,11 +1,10 @@
 from __future__ import annotations
 
-import json
 import smtplib
 from email.message import EmailMessage
 from types import SimpleNamespace
-from urllib.error import URLError
-from urllib.request import Request, urlopen
+
+import httpx
 
 from app.core.config import get_settings
 from app.models import ContactMessage, User
@@ -23,11 +22,10 @@ def notify_address(owner: User | None = None) -> str:
 
 def mail_status(owner: User | None = None) -> dict:
     settings = get_settings()
-    password = (settings.smtp_password or "").replace(" ", "").strip()
     to_addr = notify_address(owner)
     return {
         "to": to_addr,
-        "smtp_ready": bool(password and to_addr),
+        "smtp_ready": bool(settings.mail_password() and to_addr),
         "https_fallback": bool(to_addr),
         "configured": bool(to_addr),
     }
@@ -63,7 +61,7 @@ def _message_bodies(item: ContactMessage) -> tuple[str, str, str]:
 
 def _send_smtp(item: ContactMessage, to_addr: str) -> None:
     settings = get_settings()
-    password = (settings.smtp_password or "").replace(" ", "").strip()
+    password = settings.mail_password()
     smtp_user = (settings.smtp_username or to_addr).strip()
     if not password or not smtp_user:
         raise RuntimeError("SMTP_PASSWORD is not set on the API")
@@ -77,60 +75,46 @@ def _send_smtp(item: ContactMessage, to_addr: str) -> None:
     message.set_content(text)
     message.add_alternative(html, subtype="html")
 
-    errors: list[str] = []
-    attempts = (
-        (settings.smtp_host, 465, True),
-        (settings.smtp_host, settings.smtp_port or 587, False),
-    )
-    for host, port, use_ssl in attempts:
-        try:
-            server = (
-                smtplib.SMTP_SSL(host, port, timeout=15)
-                if use_ssl
-                else smtplib.SMTP(host, port, timeout=15)
-            )
-            with server:
-                if not use_ssl:
-                    server.starttls()
-                server.login(smtp_user, password)
-                server.send_message(message)
-            return
-        except Exception as exc:
-            errors.append(f"{host}:{port} {exc}")
-    raise RuntimeError("; ".join(errors))
+    host = settings.smtp_host
+    port = settings.smtp_port or 587
+    server = smtplib.SMTP(host, port, timeout=8)
+    with server:
+        server.starttls()
+        server.login(smtp_user, password)
+        server.send_message(message)
 
 
 def _send_https(item: ContactMessage, to_addr: str) -> None:
     subject, text, _html = _message_bodies(item)
-    payload = json.dumps(
-        {
-            "name": item.sender_name,
-            "email": item.sender_email,
-            "_replyto": item.sender_email,
-            "_subject": f"[Portfolio] {subject}",
-            "message": text,
-            "_template": "box",
-            "_captcha": "false",
-        }
-    ).encode("utf-8")
-    request = Request(
-        f"https://formsubmit.co/ajax/{to_addr}",
-        data=payload,
-        headers={
-            "Content-Type": "application/json",
-            "Accept": "application/json",
-        },
-        method="POST",
-    )
+    payload = {
+        "name": item.sender_name,
+        "email": item.sender_email,
+        "_replyto": item.sender_email,
+        "_subject": f"[Portfolio] {subject}",
+        "message": text,
+        "_template": "box",
+        "_captcha": "false",
+    }
+    headers = {
+        "Accept": "application/json",
+        "User-Agent": "PortfolioContact/1.0",
+    }
+    with httpx.Client(timeout=15.0, follow_redirects=True, headers=headers) as client:
+        response = client.post(f"https://formsubmit.co/ajax/{to_addr}", json=payload)
+        if response.status_code >= 400:
+            response = client.post(
+                f"https://formsubmit.co/{to_addr}",
+                data=payload,
+            )
+    if response.status_code >= 400:
+        raise RuntimeError(f"HTTPS mail HTTP {response.status_code}: {response.text[:240]}")
     try:
-        with urlopen(request, timeout=20) as response:
-            body = json.loads(response.read().decode("utf-8") or "{}")
-    except URLError as exc:
-        raise RuntimeError(f"HTTPS mail failed: {exc}") from exc
-    if str(body.get("success")).lower() not in {"true", "1"} and body.get("message"):
-        # FormSubmit still emails after the first confirmation even when success is true.
-        if "error" in str(body).lower():
-            raise RuntimeError(body.get("message") or "HTTPS mail failed")
+        body = response.json()
+    except ValueError:
+        return
+    blob = str(body).lower()
+    if "error" in blob and "success" not in blob:
+        raise RuntimeError(body.get("message") or "HTTPS mail failed")
 
 
 def send_contact_email(owner: User, item: ContactMessage) -> bool:
@@ -139,20 +123,23 @@ def send_contact_email(owner: User, item: ContactMessage) -> bool:
         print("gmail notify skipped: no NOTIFY_EMAIL")
         return False
 
-    smtp_error = None
-    try:
-        _send_smtp(item, to_addr)
-        return True
-    except Exception as exc:
-        smtp_error = exc
-        print(f"gmail smtp failed: {exc}")
-
+    errors: list[str] = []
     try:
         _send_https(item, to_addr)
         return True
     except Exception as exc:
+        errors.append(f"https: {exc}")
         print(f"gmail https failed: {exc}")
-        raise RuntimeError(f"{smtp_error}; {exc}") from exc
+
+    if get_settings().mail_password():
+        try:
+            _send_smtp(item, to_addr)
+            return True
+        except Exception as exc:
+            errors.append(f"smtp: {exc}")
+            print(f"gmail smtp failed: {exc}")
+
+    raise RuntimeError("; ".join(errors) or "Gmail send failed")
 
 
 def test_payload(owner: User) -> ContactMessage:

@@ -34,7 +34,7 @@ class UserCreate(BaseModel):
 
 
 class LoginRequest(BaseModel):
-    email: AppEmail
+    email: str = Field(min_length=3, max_length=255)
     password: str
 
 

@@ -34,6 +34,21 @@ def test_health(client):
     assert icon.status_code == 204
 
 
+def test_login_accepts_username(client, tmp_path):
+    unique = tmp_path.name.replace("-", "")[:8]
+    payload, _headers = _register(client, f"user{unique}")
+    by_name = client.post(
+        "/api/auth/login",
+        json={"email": payload["username"], "password": payload["password"]},
+    )
+    assert by_name.status_code == 200, by_name.text
+    by_email = client.post(
+        "/api/auth/login",
+        json={"email": payload["email"], "password": payload["password"]},
+    )
+    assert by_email.status_code == 200, by_email.text
+
+
 def test_register_login_and_profile(client, tmp_path):
     unique = tmp_path.name.replace("-", "")[:8]
     payload, headers = _register(client, f"user{unique}")
