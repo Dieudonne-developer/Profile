@@ -13,7 +13,7 @@ import {
   Users,
 } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
-import { api, mediaUrl } from '../api'
+import { api, mediaUrl, photoFallback } from '../api'
 
 const links = [
   { to: '/app', label: 'Overview', icon: House, end: true },
@@ -66,7 +66,7 @@ export function Layout() {
         </nav>
         <div className="sidebar-foot">
           <div className="user-chip">
-            <img src={mediaUrl(profile?.photo_path)} alt="" />
+            <img src={mediaUrl(profile?.photo_path)} alt="" onError={photoFallback} />
             <div>
               <strong>{profile?.full_name || user?.username}</strong>
               <span>{user?.email}</span>

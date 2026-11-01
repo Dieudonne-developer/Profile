@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { api, mediaUrl } from '../api'
+import { api, mediaUrl, photoFallback } from '../api'
 import { useAuth } from '../context/AuthContext'
 import { useToast } from '../context/ToastContext'
 import { Button, Card } from '../components/ui'
@@ -51,7 +51,7 @@ export function Network() {
           <Card key={person.id}>
             <div className="row space">
               <div className="row">
-                <img className="avatar avatar-sm" src={mediaUrl(person.photo_path)} alt="" />
+                <img className="avatar avatar-sm" src={mediaUrl(person.photo_path)} alt="" onError={photoFallback} />
                 <div>
                   <Link to={`/u/${person.username}`}><strong>{person.full_name || person.username}</strong></Link>
                   <p className="muted">@{person.username} · {person.headline}</p>

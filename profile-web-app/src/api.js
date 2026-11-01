@@ -72,12 +72,20 @@ export async function api(path, options = {}) {
   return data
 }
 
+export const FALLBACK_PHOTO = '/avatar.jpg'
+
 export const mediaUrl = (path) => {
-  if (!path) return '/avatar.jpg'
+  if (!path) return FALLBACK_PHOTO
   if (path.startsWith('http')) return path
   if (path.startsWith('/media/')) return apiUrl(path)
   if (path.startsWith('/')) return path
   return apiUrl(`/media/${path}`)
+}
+
+export function photoFallback(event) {
+  if (!event.currentTarget.src.endsWith(FALLBACK_PHOTO)) {
+    event.currentTarget.src = FALLBACK_PHOTO
+  }
 }
 
 export async function downloadCv(username) {

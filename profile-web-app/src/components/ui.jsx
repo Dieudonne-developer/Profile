@@ -1,4 +1,4 @@
-import { mediaUrl } from '../api'
+import { mediaUrl, photoFallback } from '../api'
 
 export function Card({ children, className = '' }) {
   return <section className={`card ${className}`}>{children}</section>
@@ -22,7 +22,14 @@ export function Field({ label, children }) {
 }
 
 export function Avatar({ src, alt, size = '' }) {
-  return <img className={`avatar ${size}`} src={mediaUrl(src)} alt={alt || ''} />
+  return (
+    <img
+      className={`avatar ${size}`}
+      src={mediaUrl(src)}
+      alt={alt || ''}
+      onError={photoFallback}
+    />
+  )
 }
 
 export function Empty({ title, text }) {

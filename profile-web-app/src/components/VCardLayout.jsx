@@ -1,6 +1,6 @@
 import { Download, Glasses, Globe, House, Send } from 'lucide-react'
 import { Link, useLocation } from 'react-router-dom'
-import { mediaUrl } from '../api'
+import { mediaUrl, photoFallback } from '../api'
 import { formatBirthday } from '../lib/format'
 import { useAuth } from '../context/AuthContext'
 
@@ -117,7 +117,7 @@ export function VCardSide({ profile, user, onDownload }) {
         <p>{job}</p>
       </div>
       <div className="vcard-photo-wrap">
-        <img className="vcard-photo" src={mediaUrl(profile?.photo_path)} alt={name} />
+        <img className="vcard-photo" src={mediaUrl(profile?.photo_path)} alt={name} onError={photoFallback} />
         <span className="vcard-badge" aria-hidden="true">
           <Glasses size={20} />
         </span>
